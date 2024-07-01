@@ -1,4 +1,4 @@
-import { getConnection } from "../../database/connection.js";
+import { getConnection } from "../../database/mssql/connection.js";
 import sql from "mssql";
 
 const pool = await getConnection();
