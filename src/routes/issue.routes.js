@@ -1,21 +1,19 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { IssueController } from "../controllers/issue.controllers.js";
+import { IssueController } from '../controllers/issue.controllers.js'
 
-export const createIssueRouter = ({ issueModel }) => {
-  const router = Router();
+export const createIssueRouter = ({ model }) => {
+  const router = Router()
 
-  const issueController = new IssueController({ issueModel });
+  const controller = new IssueController({ model })
 
-  router.get("/", issueController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", issueController.getById);
+  router.get('/:id', controller.getById)
 
-  router.post("/", issueController.create);
+  router.post('/', controller.create)
 
-  router.put("/:id", issueController.update);
+  router.put('/:id', controller.update)
 
-  router.delete("/:id", issueController.delete);
-
-  return router;
-};
+  return router
+}

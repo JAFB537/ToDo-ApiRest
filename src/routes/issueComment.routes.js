@@ -1,23 +1,23 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { IssueCommentController } from "../controllers/issueComment.controllers.js";
+import { IssueCommentController } from '../controllers/issueComment.controllers.js'
 
-export const createIssueCommentRouter = ({ issueCommentModel }) => {
-  const router = Router();
+export const createIssueCommentRouter = ({ model }) => {
+  const router = Router()
 
-  const issueCommentController = new IssueCommentController({ issueCommentModel });
+  const controller = new IssueCommentController({ model })
 
-  router.get("/", issueCommentController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", issueCommentController.getById);
+  router.get('/:id', controller.getById)
 
-  router.get("/user/:id", issueCommentController.getByUserId);
+  router.get('/user/:id', controller.getByUserId)
 
-  router.get("/issue/:id", issueCommentController.getByIssueId);
+  router.get('/issue/:id', controller.getByIssueId)
 
-  router.post("/", issueCommentController.create);
+  router.post('/', controller.create)
 
-  router.delete("/:id", issueCommentController.delete);
+  router.delete('/:id', controller.delete)
 
-  return router;
-};
+  return router
+}

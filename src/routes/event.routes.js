@@ -1,21 +1,21 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { EventController } from "../controllers/event.controllers.js";
+import { EventController } from '../controllers/event.controllers.js'
 
-export const createEventRouter = ({ eventModel }) => {
-  const router = Router();
+export const createEventRouter = ({ model }) => {
+  const router = Router()
 
-  const eventController = new EventController({ eventModel });
+  const controller = new EventController({ model })
 
-  router.get("/", eventController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", eventController.getById);
+  router.get('/:id', controller.getById)
 
-  router.post("/", eventController.create);
+  router.post('/', controller.create)
 
-  router.put("/:id", eventController.update);
+  router.put('/:id', controller.update)
 
-  router.delete("/:id", eventController.delete);
+  router.delete('/:id', controller.delete)
 
-  return router;
-};
+  return router
+}

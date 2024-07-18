@@ -1,21 +1,21 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { StateController } from "../controllers/state.controllers.js";
+import { StateController } from '../controllers/state.controllers.js'
 
-export const createStateRouter = ({ stateModel }) => {
-  const router = Router();
+export const createStateRouter = ({ model }) => {
+  const router = Router()
 
-  const stateController = new StateController({ stateModel });
+  const controller = new StateController({ model })
 
-  router.get("/", stateController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", stateController.getById);
+  router.get('/:id', controller.getById)
 
-  router.post("/", stateController.create);
+  router.post('/', controller.create)
 
-  router.put("/:id", stateController.update);
+  router.put('/:id', controller.update)
 
-  router.delete("/:id", stateController.delete);
+  router.delete('/:id', controller.delete)
 
-  return router;
-};
+  return router
+}

@@ -1,23 +1,23 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { UserController } from "../controllers/user.controllers.js";
+import { UserController } from '../controllers/user.controllers.js'
 
-export const createUserRouter = ({ userModel }) => {
-  const router = Router();
+export const createUserRouter = ({ model, title = 'USER' }) => {
+  const router = Router()
 
-  const userController = new UserController({ userModel });
+  const userController = new UserController({ model, title })
 
-  router.get("/", userController.getAll);
+  router.get('/', userController.getAll)
 
-  router.get("/:id", userController.getById);
+  router.get('/:id', userController.getById)
 
-  router.post("/login", userController.getLogin);
+  router.post('/login', userController.getLogin)
 
-  router.post("/", userController.create);
+  router.post('/', userController.create)
 
-  router.put("/:id", userController.update);
+  router.put('/:id', userController.update)
 
-  router.delete("/:id", userController.delete);
+  router.delete('/:id', userController.delete)
 
-  return router;
-};
+  return router
+}

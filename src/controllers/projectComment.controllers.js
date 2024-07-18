@@ -1,86 +1,55 @@
-import { ProjectCommentModel } from "../models/mssql/projectComment.models.js";
+import { ModelController } from './model.controllers.js'
+import { messages } from '../utils/messages.js'
 
-export class ProjectCommentController {
-  constructor({ projectCommentModel }) {
-    this.projectCommentModel = projectCommentModel;
+import { ProjectCommentSchema } from '../schemas/projectComment.schemas.js'
+
+import { isValidPositiveInteger } from '../utils/validates.js'
+
+import { BaseError } from '../middlewares/baseError.js'
+
+export class ProjectCommentController extends ModelController {
+  constructor ({ model }) {
+    super({ model, schema: ProjectCommentSchema, title: 'Project Comment', formatID: isValidPositiveInteger })
   }
 
-  getAll = async (req, res) => {
+  getByProjectId = async (req, res, next) => {
+    const id = req.params.id
     try {
-      const result = await this.projectCommentModel.getAll();
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getAll:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getById = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.projectCommentModel.getById({
-        id,
-      });
-
-      res.json(result.recordset[0]);
-    } catch (error) {
-      console.error("Error in getById:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getByProjectId = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.projectCommentModel.getByProjectId({ id });
-
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getByProjectId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getByUserId = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.projectCommentModel.getByUserId({ id });
-
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getByUserId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  create = async (req, res) => {
-    const input = req.body;
-    try {
-      const result = await this.projectCommentModel.create({ input });
-
-      res.json({
-        message: "Project Comment Created Successfully",
-        projectComment: req.body,
-      });
-    } catch (error) {
-      console.error("Error in create:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  delete = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.projectCommentModel.delete({ id });
-
-      if (!result) {
-        return res.status(404).json({ message: "Project Comment not found" });
+      if (!this.formatID(id)) {
+        throw new BaseError(messages.error.INVALID_INPUT, 400, 'Invalid ID type or format.', true)
       }
 
-      res.json({ message: "Project Comment Deleted Successfully" });
+      const result = await this.model.getByProjectId({ id })
+
+      if ((!result || result.length === 0)) {
+        throw new BaseError(messages.error.NOT_FOUND(this.title), 404, 'Record with ID provided not found.', true)
+      }
+
+      res.status(200).json({ message: messages.success.GOTTEN(this.title), status: 200, data: result })
     } catch (error) {
-      console.error("Error in delete:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+      next(error)
     }
-  };
+  }
+
+  getByUserId = async (req, res, next) => {
+    const id = req.params.id
+    try {
+      if (!this.formatID(id)) {
+        throw new BaseError(messages.error.INVALID_INPUT, 400, 'Invalid ID type or format.', true)
+      }
+      const result = await this.model.getByUserId({ id })
+
+      if ((!result || result.length === 0)) {
+        throw new BaseError(messages.error.NOT_FOUND(this.title), 404, 'Record with ID provided not found.', true)
+      }
+
+      res.status(200).json({ message: messages.success.GOTTEN(this.title), status: 200, data: result })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  update = async (req, res) => {
+    res.json({ message: messages.error.SERVER_ERROR })
+  }
 }

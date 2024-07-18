@@ -1,23 +1,23 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { UserProjectController } from "../controllers/userProject.controllers.js";
+import { UserProjectController } from '../controllers/userProject.controllers.js'
 
-export const createUserProjectRouter = ({ userProjectModel }) => {
-  const router = Router();
+export const createUserProjectRouter = ({ model }) => {
+  const router = Router()
 
-  const userProjectController = new UserProjectController({ userProjectModel });
+  const controller = new UserProjectController({ model })
 
-  router.get("/", userProjectController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", userProjectController.getById);
+  router.get('/:id', controller.getById)
 
-  router.get("/user/:id", userProjectController.getByUserId);
+  router.get('/user/:id', controller.getByUserId)
 
-  router.get("/project/:id", userProjectController.getByProjectId);
+  router.get('/project/:id', controller.getByProjectId)
 
-  router.post("/", userProjectController.create);
+  router.post('/', controller.create)
 
-  router.delete("/:id", userProjectController.delete);
+  router.delete('/:id', controller.delete)
 
-  return router;
-};
+  return router
+}

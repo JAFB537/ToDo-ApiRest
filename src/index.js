@@ -1,7 +1,11 @@
 import app from './app.js'
 
-const PORT = process.env.PORT || 3000;
+import { logger } from './utils/logger.js'
 
-app.listen(PORT, () => {
-    console.log(`Start Server On Port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000
+
+export const server = app.listen(PORT, () => {
+  logger.info(`Start Server On Port ${PORT}`)
+})
+
+export default app

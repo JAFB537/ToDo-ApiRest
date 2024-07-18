@@ -1,23 +1,35 @@
-import { z } from "zod";
+import { z } from 'zod'
+import { isValidDate } from '../utils/validates.js'
 
 const eventSchema = z.object({
   StartDate: z
-    .date()
-    .min(new Date(), { message: "Start date must be in the future" }),
+    .string()
+    .min(1, { message: 'StartDate is required' })
+    .refine((val) => isValidDate(val), { message: 'Invalid StartDate Format' }),
   EndDate: z
-    .date()
-    .min(z.ref("StartDate"), { message: "End date must be after start date" }),
-  Description: z.string().max(1000).optional(),
-  UserID: z.string().uuid(),
-  IssueID: z.number().int(),
-});
+    .string()
+    .min(1, { message: 'EndDate is required' })
+    .refine((val) => isValidDate(val), { message: 'Invalid EndDate Format' }),
+  Description: z
+    .string()
+    .max(1000, { message: 'Description must be 1000 characters or less' })
+    .optional(),
+  UserID: z
+    .string()
+    .uuid({ message: 'Invalid UUID format' })
+    .min(1, { message: 'UserID is required' }),
+  IssueID: z
+    .number()
+    .int()
+    .refine((val) => val !== null, { message: 'IssueID is required' })
+})
 
 export class EventSchema {
-  static validate(input) {
-    return eventSchema.safeParse(input);
+  static validate (input) {
+    return eventSchema.safeParse(input)
   }
 
-  static validatePartial(input) {
-    return eventSchema.partial().safeParse(input);
+  static validatePartial (input) {
+    return eventSchema.partial().safeParse(input)
   }
 }

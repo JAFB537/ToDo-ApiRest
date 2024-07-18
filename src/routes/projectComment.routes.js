@@ -1,23 +1,23 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { ProjectCommentController } from "../controllers/projectComment.controllers.js";
+import { ProjectCommentController } from '../controllers/projectComment.controllers.js'
 
-export const createProjectCommentRouter = ({ projectCommentModel }) => {
-  const router = Router();
+export const createProjectCommentRouter = ({ model }) => {
+  const router = Router()
 
-  const projectCommentController = new ProjectCommentController({ projectCommentModel });
+  const controller = new ProjectCommentController({ model })
 
-  router.get("/", projectCommentController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", projectCommentController.getById);
+  router.get('/:id', controller.getById)
 
-  router.get("/project/:id", projectCommentController.getByProjectId);
+  router.get('/project/:id', controller.getByProjectId)
 
-  router.get("/user/:id", projectCommentController.getByUserId);
+  router.get('/user/:id', controller.getByUserId)
 
-  router.post("/", projectCommentController.create);
+  router.post('/', controller.create)
 
-  router.delete("/:id", projectCommentController.delete);
+  router.delete('/:id', controller.delete)
 
-  return router;
-};
+  return router
+}

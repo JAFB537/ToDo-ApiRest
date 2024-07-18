@@ -1,84 +1,192 @@
-import { getConnection } from "../../database/mssql/connection.js";
-import sql from "mssql";
+import { getConnection } from '../../database/mssql/connection.js'
+import sql from 'mssql'
 
-const pool = await getConnection();
+import { ProjectCommentFormat } from '../../utils/formats.js'
+
+const pool = await getConnection()
 
 export class ProjectCommentModel {
-  static async getAll() {
-    console.log("Get All Project Comments");
+  static async getAll () {
+    const result = await pool.request().query(`
+        SELECT 
+          pc.ProjectCommentID,
+          pc.Description AS CommentDescription,
+          pc.UserID AS CommentUserID,
+          pc.ProjectID AS CommentProjectID,
+          u.UserID,
+          u.Name AS UserName,
+          u.LastName AS UserLastName,
+          u.Age AS UserAge,
+          u.PhoneNumber AS UserPhoneNumber,
+          u.UserName AS UserUserName,
+          u.Email AS UserEmail,
+          u.Image AS UserImage,
+          u.Country AS UserCountry,
+          p.ProjectID,
+          p.Name AS ProjectName,
+          p.Description AS ProjectDescription,
+          p.StartDate AS ProjectStartDate,
+          p.EndDate AS ProjectEndDate,
+          p.DateCreated AS ProjectDateCreated,
+          s.StateID,
+          s.Name AS StateName
+        FROM 
+            ProjectComment pc
+        INNER JOIN 
+            [User] u ON pc.UserID = u.UserID
+        INNER JOIN 
+            Project p ON pc.ProjectID = p.ProjectID
+        INNER JOIN 
+            State s ON p.StateID = s.StateID;
+      `)
 
-    const result = await pool
-      .request()
-      .query("SELECT * FROM [ProjectComment];");
-
-    return result;
+    return ProjectCommentFormat(result.recordset)
   }
 
-  static async getById({ id }) {
-    console.log("Get Project Comments By ID");
+  static async getById ({ id }) {
+    const result = await pool.request().input('ProjectCommentID', sql.Int, id)
+      .query(`
+        SELECT 
+          pc.ProjectCommentID,
+          pc.Description AS CommentDescription,
+          pc.UserID AS CommentUserID,
+          pc.ProjectID AS CommentProjectID,
+          u.UserID,
+          u.Name AS UserName,
+          u.LastName AS UserLastName,
+          u.Age AS UserAge,
+          u.PhoneNumber AS UserPhoneNumber,
+          u.UserName AS UserUserName,
+          u.Email AS UserEmail,
+          u.Image AS UserImage,
+          u.Country AS UserCountry,
+          p.ProjectID,
+          p.Name AS ProjectName,
+          p.Description AS ProjectDescription,
+          p.StartDate AS ProjectStartDate,
+          p.EndDate AS ProjectEndDate,
+          p.DateCreated AS ProjectDateCreated,
+          s.StateID,
+          s.Name AS StateName
+        FROM 
+            ProjectComment pc
+        INNER JOIN 
+            [User] u ON pc.UserID = u.UserID
+        INNER JOIN 
+            Project p ON pc.ProjectID = p.ProjectID
+        INNER JOIN 
+            State s ON p.StateID = s.StateID
+        WHERE pc.ProjectCommentID = @ProjectCommentID;
+      `)
 
-    const result = await pool
-      .request()
-      .input("ProjectCommentID", sql.Int, id)
-      .query(
-        "SELECT * FROM [ProjectComment] WHERE ProjectCommentID = @ProjectCommentID;"
-      );
-
-    return result;
+    return ProjectCommentFormat(result.recordset)
   }
 
-  static async getByProjectId({ id }) {
-    console.log("Get Project Comments By Project ID");
+  static async getByProjectId ({ id }) {
+    const result = await pool.request().input('ProjectID', sql.Int, id).query(`
+        SELECT 
+          pc.ProjectCommentID,
+          pc.Description AS CommentDescription,
+          pc.UserID AS CommentUserID,
+          pc.ProjectID AS CommentProjectID,
+          u.UserID,
+          u.Name AS UserName,
+          u.LastName AS UserLastName,
+          u.Age AS UserAge,
+          u.PhoneNumber AS UserPhoneNumber,
+          u.UserName AS UserUserName,
+          u.Email AS UserEmail,
+          u.Image AS UserImage,
+          u.Country AS UserCountry,
+          p.ProjectID,
+          p.Name AS ProjectName,
+          p.Description AS ProjectDescription,
+          p.StartDate AS ProjectStartDate,
+          p.EndDate AS ProjectEndDate,
+          p.DateCreated AS ProjectDateCreated,
+          s.StateID,
+          s.Name AS StateName
+        FROM 
+            ProjectComment pc
+        INNER JOIN 
+            [User] u ON pc.UserID = u.UserID
+        INNER JOIN 
+            Project p ON pc.ProjectID = p.ProjectID
+        INNER JOIN 
+            State s ON p.StateID = s.StateID
+        WHERE p.ProjectID = @ProjectID;
+      `)
 
-    const result = await pool
-      .request()
-      .input("ProjectID", sql.Int, id)
-      .query("SELECT * FROM [ProjectComment] WHERE ProjectID = @ProjectID;");
-
-    return result;
+    return ProjectCommentFormat(result.recordset)
   }
 
-  static async getByUserId({ id }) {
-    console.log("Get Project Comments By User ID");
-
+  static async getByUserId ({ id }) {
     const result = await pool
       .request()
-      .input("UserID", sql.UniqueIdentifier, id)
-      .query("SELECT * FROM [ProjectComment] WHERE UserID = @UserID;");
+      .input('UserID', sql.UniqueIdentifier, id).query(`
+        SELECT 
+          pc.ProjectCommentID,
+          pc.Description AS CommentDescription,
+          pc.UserID AS CommentUserID,
+          pc.ProjectID AS CommentProjectID,
+          u.UserID,
+          u.Name AS UserName,
+          u.LastName AS UserLastName,
+          u.Age AS UserAge,
+          u.PhoneNumber AS UserPhoneNumber,
+          u.UserName AS UserUserName,
+          u.Email AS UserEmail,
+          u.Image AS UserImage,
+          u.Country AS UserCountry,
+          p.ProjectID,
+          p.Name AS ProjectName,
+          p.Description AS ProjectDescription,
+          p.StartDate AS ProjectStartDate,
+          p.EndDate AS ProjectEndDate,
+          p.DateCreated AS ProjectDateCreated,
+          s.StateID,
+          s.Name AS StateName
+        FROM 
+            ProjectComment pc
+        INNER JOIN 
+            [User] u ON pc.UserID = u.UserID
+        INNER JOIN 
+            Project p ON pc.ProjectID = p.ProjectID
+        INNER JOIN 
+            State s ON p.StateID = s.StateID
+        WHERE u.UserID = @UserID;
+      `)
 
-    return result;
+    return ProjectCommentFormat(result.recordset)
   }
 
-  static async create({ input }) {
-    console.log("Create Project Comment");
-
-    const { UserID, ProjectID, Description } = input;
+  static async create ({ input }) {
+    const { UserID, ProjectID, Description } = input
 
     const result = await pool
       .request()
-      .input("UserID", sql.UniqueIdentifier, UserID)
-      .input("ProjectID", sql.Int, ProjectID)
-      .input("Description", sql.VarChar, Description).query(`
+      .input('UserID', sql.UniqueIdentifier, UserID)
+      .input('ProjectID', sql.Int, ProjectID)
+      .input('Description', sql.VarChar, Description).query(`
         INSERT INTO [ProjectComment] (UserID, ProjectID, Description) 
         VALUES (@UserID, @ProjectID, @Description);
-      `);
+      `)
 
-    return result;
+    return result
   }
 
-  static async delete({ id }) {
-    console.log("Delete Project Comment");
-
+  static async delete ({ id }) {
     const result = await pool
       .request()
-      .input("ProjectCommentID", sql.Int, id)
+      .input('ProjectCommentID', sql.Int, id)
       .query(
-        "DELETE FROM [ProjectComment] WHERE ProjectCommentID = @ProjectCommentID;"
-      );
+        'DELETE FROM [ProjectComment] WHERE ProjectCommentID = @ProjectCommentID;'
+      )
 
     if (result.rowsAffected && result.rowsAffected[0] > 0) {
-      return true;
+      return true
     }
-    return false;
+
+    return false
   }
 }

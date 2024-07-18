@@ -1,87 +1,57 @@
-import { UserProjectModel } from "../models/mssql/userProject.models.js";
-import { UserSchema } from "../schemas/user.schemas.js";
+import { messages } from '../utils/messages.js'
 
-export class UserProjectController {
-  constructor({ userProjectModel }) {
-    this.userProjectModel = userProjectModel;
+import { ModelController } from './model.controllers.js'
+
+import { UserProjectSchema } from '../schemas/userProject.schemas.js'
+
+import { isValidPositiveInteger, isValidUUID } from '../utils/validates.js'
+
+import { BaseError } from '../middlewares/baseError.js'
+
+export class UserProjectController extends ModelController {
+  constructor ({ model }) {
+    super({ model, schema: UserProjectSchema, title: 'User Project', formatID: isValidPositiveInteger })
   }
 
-  getAll = async (req, res) => {
+  getByUserId = async (req, res, next) => {
+    const id = req.params.id
     try {
-      const result = await this.userProjectModel.getAll();
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getAll:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getById = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.userProjectModel.getById({ id });
-
-      res.json(result.recordset[0]);
-    } catch (error) {
-      console.error("Error in getId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getByUserId = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.userProjectModel.getByUserId({ id });
-
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getByUserId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getByProjectId = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.userProjectModel.getByProjectId({ id });
-
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getByProjectId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  create = async (req, res) => {
-    const input = req.body;
-    try {
-      const result = await this.userProjectModel.create({ input });
-
-      res.json({
-        message: "User-Project Created Successfully",
-        userProject: req.body,
-      });
-    } catch (error) {
-      console.error("Error in create:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  delete = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.userProjectModel.delete({ id });
-
-      if (!result) {
-        return res
-          .status(404)
-          .json({ message: "User-Project not found" });
+      if (!isValidUUID(id)) {
+        throw new BaseError(messages.error.INVALID_INPUT, 400, 'Invalid ID type or format.', true)
       }
 
-      res.json({ message: "User-Project Deleted Successfully" });
+      const result = await this.model.getByUserId({ id })
+
+      if ((!result || result.length === 0)) {
+        throw new BaseError(messages.error.NOT_FOUND(this.title), 404, 'Record with ID provided not found.', true)
+      }
+
+      res.status(200).json({ message: messages.success.GOTTEN(this.title), status: 200, data: result })
     } catch (error) {
-      console.error("Error in delete:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+      next(error)
     }
-  };
+  }
+
+  getByProjectId = async (req, res, next) => {
+    const id = req.params.id
+    try {
+      if (!this.formatID(id)) {
+        throw new BaseError(messages.error.INVALID_INPUT, 400, 'Invalid ID type or format.', true)
+      }
+
+      const result = await this.model.getByProjectId({ id })
+
+      if ((!result || result.length === 0)) {
+        throw new BaseError(messages.error.NOT_FOUND(this.title), 404, 'Record with ID provided not found.', true)
+      }
+
+      res.status(200).json({ message: messages.success.GOTTEN(this.title), status: 200, data: result })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  update = async (req, res) => {
+    res.json({ message: messages.error.SERVER_ERROR })
+  }
 }

@@ -1,100 +1,55 @@
-export class IssueCommentController {
-  constructor({ issueCommentModel }) {
-    this.issueCommentModel = issueCommentModel;
+import { messages } from '../utils/messages.js'
+import { ModelController } from './model.controllers.js'
+
+import { IssueCommentSchema } from '../schemas/issueComment.schemas.js'
+
+import { isValidPositiveInteger, isValidUUID } from '../utils/validates.js'
+import { BaseError } from '../middlewares/baseError.js'
+
+export class IssueCommentController extends ModelController {
+  constructor ({ model }) {
+    super({ model, schema: IssueCommentSchema, title: 'Issue Comment', formatID: isValidPositiveInteger })
   }
 
-  getAll = async (req, res) => {
+  getByIssueId = async (req, res, next) => {
+    const id = req.params.id
     try {
-      const result = await this.issueCommentModel.getAll();
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getAll Issue Comments:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  getById = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.issueCommentModel.getById({ id });
-
-      if (!result || result.length === 0) {
-        return res.status(404).json({
-          message: "Issue Comments Not Found",
-        });
+      if (!this.formatID(id)) {
+        throw new BaseError(messages.error.INVALID_INPUT, 400, 'Invalid ID type or format.', true)
       }
 
-      res.json(result.recordset[0]);
-    } catch (error) {
-      console.error("Error in getById:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
+      const result = await this.model.getByIssueId({ id })
 
-  getByIssueId = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.issueCommentModel.getByIssueId({ id });
-
-      if (!result || result.length === 0) {
-        return res.status(404).json({
-          message: "Issue Comments Not Found",
-        });
+      if ((!result || result.length === 0)) {
+        throw new BaseError(messages.error.NOT_FOUND(this.title), 404, 'Record with ID provided not found.', true)
       }
 
-      res.json(result.recordset);
+      res.status(200).json({ message: messages.success.GOTTEN(this.title), status: 200, data: result })
     } catch (error) {
-      console.error("Error in getByIssueId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+      next(error)
     }
-  };
+  }
 
-  getByUserId = async (req, res) => {
-    const id = req.params.id;
+  getByUserId = async (req, res, next) => {
+    const id = req.params.id
     try {
-      const result = await this.issueCommentModel.getByUserId({ id });
-
-      if (!result || result.length === 0) {
-        return res.status(404).json({
-          message: "Issue Comments Not Found",
-        });
+      if (!isValidUUID(id)) {
+        throw new BaseError(messages.error.INVALID_INPUT, 400, 'Invalid ID type or format.', true)
       }
 
-      res.json(result.recordset);
-    } catch (error) {
-      console.error("Error in getByUserId:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
+      const result = await this.model.getByUserId({ id })
 
-  create = async (req, res) => {
-    const input = req.body
-    try {
-      const result = await this.issueCommentModel.create({ input });
-
-      res.json({
-        message: "Issue Comment Created Successfully",
-        comment: req.body,
-      });
-    } catch (error) {
-      console.error("Error in create Issue Comment:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  delete = async (req, res) => {
-    const id = req.params.id;
-    try {
-      const result = await this.issueCommentModel.delete({ id });
-
-      if (result === false) {
-        return res.status(404).json({ message: "Issue Comment not found" });
+      if ((!result || result.length === 0)) {
+        throw new BaseError(messages.error.NOT_FOUND(this.title), 404, 'Record with ID provided not found.', true)
       }
 
-      res.json({ message: "Issue Comment Deleted Successfully" });
+      res.status(200).json({ message: messages.success.GOTTEN(this.title), status: 200, data: result })
     } catch (error) {
-      console.error("Error in delete Issue Comment:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+      next(error)
     }
-  };
+  }
+
+  update = async (req, res) => {
+    res.json({ message: messages.error.SERVER_ERROR })
+  }
 }

@@ -1,64 +1,106 @@
-import { getConnection } from "../../database/mssql/connection.js";
-import sql from "mssql";
+import { getConnection } from '../../database/mssql/connection.js'
+import sql from 'mssql'
 
-const pool = await getConnection();
+import { ProjectFormat } from '../../utils/formats.js'
+
+const pool = await getConnection()
 
 export class ProjectModel {
-  static async getAll() {
-    console.log("Get All Projects");
+  static async getAll () {
+    const result = await pool.request().query(`
+      SELECT 
+        p.ProjectID,
+        p.Name AS ProjectName,
+        p.Description AS ProjectDescription,
+        FORMAT(p.StartDate, 'dd/MM/yyyy HH:mm:ss') AS ProjectStartDate,
+        FORMAT(p.EndDate, 'dd/MM/yyyy HH:mm:ss') AS ProjectEndDate,
+        FORMAT(p.DateCreated, 'dd/MM/yyyy HH:mm:ss') AS ProjectDateCreated,
+        s.StateID,
+        s.Name AS StateName,
+        u.UserID,
+        u.Name AS UserName,
+        u.LastName AS UserLastName,
+        u.Age AS UserAge,
+        u.PhoneNumber AS UserPhoneNumber,
+        u.UserName AS UserUserName,
+        u.Email AS UserEmail,
+        u.Image AS UserImage,
+        u.Country AS UserCountry
+      FROM 
+          Project p
+      INNER JOIN 
+          State s ON p.StateID = s.StateID
+      INNER JOIN 
+          [User] u ON p.UserID = u.UserID;
+    `)
 
-    const result = await pool.request().query("SELECT * FROM [Project];");
-
-    return result;
+    return ProjectFormat(result.recordset)
   }
 
-  static async getById({ id }) {
-    console.log("Get Project By Id");
+  static async getById ({ id }) {
+    const result = await pool.request().input('ProjectID', sql.Int, id).query(`
+        SELECT 
+          p.ProjectID,
+          p.Name AS ProjectName,
+          p.Description AS ProjectDescription,
+          FORMAT(p.StartDate, 'dd/MM/yyyy HH:mm:ss') AS ProjectStartDate,
+          FORMAT(p.EndDate, 'dd/MM/yyyy HH:mm:ss') AS ProjectEndDate,
+          FORMAT(p.DateCreated, 'dd/MM/yyyy HH:mm:ss') AS ProjectDateCreated,
+          s.StateID,
+          s.Name AS StateName,
+          u.UserID,
+          u.Name AS UserName,
+          u.LastName AS UserLastName,
+          u.Age AS UserAge,
+          u.PhoneNumber AS UserPhoneNumber,
+          u.UserName AS UserUserName,
+          u.Email AS UserEmail,
+          u.Image AS UserImage,
+          u.Country AS UserCountry
+        FROM 
+            Project p
+        INNER JOIN 
+            State s ON p.StateID = s.StateID
+        INNER JOIN 
+            [User] u ON p.UserID = u.UserID
+        WHERE p.ProjectID = @ProjectID;
+      `)
+
+    if (result.recordset.length === 0) return null
+
+    return ProjectFormat(result.recordset)
+  }
+
+  static async create ({ input }) {
+    const { Name, Description, StartDate, EndDate, StateID, UserID } = input
 
     const result = await pool
       .request()
-      .input("ProjectID", sql.Int, id)
-      .query("SELECT * FROM [Project] WHERE ProjectID = @ProjectID;");
-
-    if (result.recordset.length === 0) return null;
-
-    return result;
-  }
-
-  static async create({ input }) {
-    console.log("Create Project");
-
-    const { Name, Description, StartDate, EndDate, StateID, UserID } = input;
-
-    const result = await pool
-      .request()
-      .input("Name", sql.VarChar, Name)
-      .input("Description", sql.VarChar, Description)
-      .input("StartDate", sql.Date, StartDate)
-      .input("EndDate", sql.Date, EndDate)
-      .input("StateID", sql.Int, StateID)
-      .input("UserID", sql.UniqueIdentifier, UserID).query(`
+      .input('Name', sql.VarChar, Name)
+      .input('Description', sql.VarChar, Description)
+      .input('StartDate', sql.Date, StartDate)
+      .input('EndDate', sql.Date, EndDate)
+      .input('StateID', sql.Int, StateID)
+      .input('UserID', sql.UniqueIdentifier, UserID).query(`
         INSERT INTO [Project] (Name, Description, StartDate, EndDate, StateID, UserID, DateCreated) 
         VALUES (@Name, @Description, @StartDate, @EndDate, @StateID, @UserID, GETDATE());
-      `);
+      `)
 
-    return result;
+    return result
   }
 
-  static async update({ id, input }) {
-    console.log("Update Project");
-
-    const { Name, Description, StartDate, EndDate, StateID, UserID } = input;
+  static async update ({ id, input }) {
+    const { Name, Description, StartDate, EndDate, StateID, UserID } = input
 
     const result = await pool
       .request()
-      .input("ProjectID", sql.Int, id)
-      .input("Name", sql.VarChar, Name)
-      .input("Description", sql.VarChar, Description)
-      .input("StartDate", sql.Date, StartDate)
-      .input("EndDate", sql.Date, EndDate)
-      .input("StateID", sql.Int, StateID)
-      .input("UserID", sql.UniqueIdentifier, UserID).query(`
+      .input('ProjectID', sql.Int, id)
+      .input('Name', sql.VarChar, Name)
+      .input('Description', sql.VarChar, Description)
+      .input('StartDate', sql.Date, StartDate)
+      .input('EndDate', sql.Date, EndDate)
+      .input('StateID', sql.Int, StateID)
+      .input('UserID', sql.UniqueIdentifier, UserID).query(`
         UPDATE [Project] SET 
         Name = @Name,
         Description = @Description,
@@ -67,22 +109,21 @@ export class ProjectModel {
         StateID = @StateID,
         UserID = @UserID
         WHERE ProjectID = @ProjectID;
-      `);
+      `)
 
-    return result;
+    return result
   }
 
-  static async delete({ id }) {
-    console.log("Delete Project");
-
+  static async delete ({ id }) {
     const result = await pool
       .request()
-      .input("ProjectID", sql.Int, id)
-      .query("DELETE FROM [Project] WHERE ProjectID = @ProjectID;");
+      .input('ProjectID', sql.Int, id)
+      .query('DELETE FROM [Project] WHERE ProjectID = @ProjectID;')
 
     if (result.rowsAffected && result.rowsAffected[0] > 0) {
-      return true;
+      return true
     }
-    return false;
+
+    return false
   }
 }

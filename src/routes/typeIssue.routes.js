@@ -1,21 +1,21 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { TypeIssueController } from "../controllers/typeIssue.controllers.js";
+import { TypeIssueController } from '../controllers/typeIssue.controllers.js'
 
-export const createTypeIssueRouter = ({ typeIssueModel }) => {
-  const router = Router();
+export const createTypeIssueRouter = ({ model }) => {
+  const router = Router()
 
-  const typeIssueController = new TypeIssueController({ typeIssueModel });
+  const controller = new TypeIssueController({ model })
 
-  router.get("/", typeIssueController.getAll);
+  router.get('/', controller.getAll)
 
-  router.get("/:id", typeIssueController.getById);
+  router.get('/:id', controller.getById)
 
-  router.post("/", typeIssueController.create);
+  router.post('/', controller.create)
 
-  router.put("/:id", typeIssueController.update);
+  router.put('/:id', controller.update)
 
-  router.delete("/:id", typeIssueController.delete);
+  router.delete('/:id', controller.delete)
 
-  return router;
-};
+  return router
+}
